@@ -4,7 +4,7 @@ application=$1
 environment=$2
 version=$3
 
-imagename="bsli/${application}:${environment}-${version}"
+imagename="0403456/${application}:${environment}-${version}"
 
 echo "Building Image: ${imagename}"
 
