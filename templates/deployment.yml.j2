@@ -1,0 +1,65 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ Appname }}-{{ env }}-{{ version }}"
+spec:
+  replicas: {{ lookup('vars', 'app_configs',).replicas }}
+  selector:
+    matchLabels:
+      app: {{ Appname }}-{{ env }}-{{ version }}
+  template:
+    metadata:
+      labels:
+        name: "{{ Appname }}-{{ env }}-{{ version }}"
+        app: "{{ Appname }}-{{ env }}-{{ version }}"
+    spec:
+      volumes:
+      - name: timezone-config
+        hostPath:
+          path: /etc/localtime
+      containers:
+      - name: {{ Appname }}
+        image: bsli/{{ Appname }}:{{ env }}-{{ version }}
+        env:
+{% if Environment_variables is defined %}
+{% for key in Environment_variables %}
+        - name: {{ key }}
+          value: "{{ Environment_variables[key] }}"
+{% endfor %}
+{% endif %}
+        volumeMounts:
+        - name: timezone-config
+          mountPath: /etc/localtime
+        readinessProbe:
+          httpGet:
+            path: {{ lookup('vars', 'app_configs',).readinessProbe }}
+            port: 8080
+          initialDelaySeconds: 120
+          timeoutSeconds: 2
+          periodSeconds: 25
+          successThreshold: 1
+          failureThreshold: 20
+        livenessProbe:
+          httpGet:
+            path: {{ lookup('vars', 'app_configs',).readinessProbe }}
+            port: 8080
+          failureThreshold: 3
+          initialDelaySeconds: 600
+          timeoutSeconds: 2
+          periodSeconds: 20
+        resources:
+          limits:
+            cpu: "{{ lookup('vars', 'app_configs',).deploy_cpuLimit }}"
+            memory: "{{ lookup('vars', 'app_configs',).deploy_memoryLimit }}"
+          requests:
+            cpu: "{{ lookup('vars', 'app_configs',).deploy_cpuRequests }}"
+            memory: "{{ lookup('vars', 'app_configs',).deploy_memoryRequests }}"
+        ports:
+        - name: proxy
+          containerPort: 8080
+          protocol: TCP
+        - name: proxy-ssl
+          containerPort: 8443
+          protocol: TCP
+

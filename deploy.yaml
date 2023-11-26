@@ -39,3 +39,12 @@
       - "{{ applications }}"
     when: item.name is defined and item.name == "{{ Appname }}"
 
+  - name: stamp out deployment.yml.j2
+    template:
+      src: "templates/deployment.yml.j2"
+      dest: "./deployment.yml"
+      mode: '0777'
+    with_items:
+      - "{{ applications }}"
+    when: item.name is defined and item.name == "{{ Appname }}"
+

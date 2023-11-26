@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "health-checker:pre-13"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: health-checker:pre-13
+  template:
+    metadata:
+      labels:
+        name: "health-checker:pre-13"
+        app: "health-checker:pre-13"
+    spec:
+      volumes:
+      - name: timezone-config
+        hostPath:
+          path: /etc/localtime
+      containers:
+      - name: health-checker
+        image: 0403456/health-checker:pre-13
+        env:
+        - name: GEOGRAPHY
+          value: "india"
+        volumeMounts:
+        - name: timezone-config
+          mountPath: /etc/localtime
+        readinessProbe:
+          httpGet:
+            path: /fs-score-rule/v1/fsscore/ping
+            port: 8080
+          initialDelaySeconds: 120
+          timeoutSeconds: 2
+          periodSeconds: 25
+          successThreshold: 1
+          failureThreshold: 20
+        livenessProbe:
+          httpGet:
+            path: /fs-score-rule/v1/fsscore/ping
+            port: 8080
+          failureThreshold: 3
+          initialDelaySeconds: 600
+          timeoutSeconds: 2
+          periodSeconds: 20
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "3072M"
+          requests:
+            cpu: "30m"
+            memory: "1843M"
+        ports:
+        - name: proxy
+          containerPort: 8080
+          protocol: TCP
+        - name: proxy-ssl
+          containerPort: 8443
+          protocol: TCP
+
