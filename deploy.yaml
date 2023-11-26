@@ -2,42 +2,6 @@
 - hosts: node
 
   tasks:
-  - name: Get yaml file
-    shell: "./get_config_yml.sh {{ Appname }}"
-    register: config_file
-
-  - name: Set config fact
-    set_fact:
-      config_file: "{{ config_file.stdout_lines }}"
-
-  - name: Debug
-    debug: var=config_file
-
-  - name: Import config
-    include_vars: 
-      file: "{{ config_file[0] }}"
-
-  - name: Get applications 
-    set_fact:
-      applications: "{{ item[1] }}"
-    with_subelements:
-      - "{{ teams }}"
-      - applications
-    when: item[1].name == "{{ Appname }}"
-
-  - name: Get environment variables
-    set_fact:
-      Environment_variables: "{{ item.env_variables }}"
-    with_items:
-      - "{{ applications }}"
-    when: item.env_variables is defined and item.name == "{{ Appname }}"
-
-  - name: Get App Configs
-    set_fact:
-      app_configs: "{{ item.app_config }}"
-    with_items:
-      - "{{ applications }}"
-    when: item.name is defined and item.name == "{{ Appname }}"
 
   - name: stamp out deployment.yml.j2
     template:
