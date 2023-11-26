@@ -1,0 +1,23 @@
+teams:
+  - squad_name: step-syn-app
+    mail_list: khanharoon138@gmail.com
+    applications:
+      - name: healthcheck
+        owner: haroon
+        env_variables:
+          GEOGRAPHY: india
+        app_config:
+          contextroot: 
+            - /fs-score-rule
+          readinessProbe: /fs-score-rule/v1/fsscore/ping
+          deploy_cpuLimit: 500m
+          deploy_memoryLimit: 1072M
+          deploy_cpuRequests: 30m
+          deploy_memoryRequests: 1843M
+          jvm_memoryMin: -Xms64m
+          jvm_memoryMax: -Xmx1536m
+          wildfly_startup_timeout: 600
+          namespace: stepsyncapp-{{ env }}
+          replicas: 1
+          runtimeVersion: 23galleon
+          sticky_sessions: False
